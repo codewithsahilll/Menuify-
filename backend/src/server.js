@@ -1,0 +1,23 @@
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import { connectDatabase } from './db.js';
+import authRoutes from './routes/auth.js';
+import menuRoutes from './routes/menu.js';
+import orderRoutes from './routes/orders.js';
+import reviewRoutes from './routes/reviews.js';
+import qrRoutes from './routes/qr.js';
+
+const app=express();
+app.use(cors({origin:true,credentials:true}));
+app.use(express.json({limit:'2mb'}));
+app.get('/api/health',(req,res)=>res.json({ok:true,name:'MENUIFY API',time:new Date().toISOString()}));
+app.use('/api/auth',authRoutes);
+app.use('/api/menu',menuRoutes);
+app.use('/api/orders',orderRoutes);
+app.use('/api/reviews',reviewRoutes);
+app.use('/api/qr',qrRoutes);
+app.use((err,req,res,next)=>{console.error(err);res.status(500).json({message:'Server error'});});
+const port=process.env.PORT||5000;
+connectDatabase().catch(e=>console.error('MongoDB connection failed:',e.message));
+app.listen(port,()=>console.log(`MENUIFY API running on http://localhost:${port}`));
